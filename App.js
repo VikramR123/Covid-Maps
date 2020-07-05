@@ -16,17 +16,19 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      {!state && (<Text>No Latitude, No Longitude</Text>)}
-      {state && (<Text>Latitude: {lat}, Longitude: {long}</Text>)}
+      {/* {!state && (<Text>No Latitude, No Longitude</Text>)}
+      {state && (<Text>Latitude: {lat}, Longitude: {long}</Text>)} */}
 
-      <Image source={require('./assets/favicon.png')} />
+      {/* <Image source={require('./assets/favicon.png')} />
       <FetchLocation onGetLocation={handleGetLocation} />
-      <Text>Open up App.js to start working on your app!!</Text>
+      <Text>Open up App.js to start working on your app!!</Text> */}
+
       {/* <Image source={{ 
         width: 200,
         height: 300,
         uri: "https://picsum.photos/200/300" 
       }} /> */}
+      
       <UserMap />
       
       {/* <MapView

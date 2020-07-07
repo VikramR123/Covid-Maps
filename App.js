@@ -6,14 +6,18 @@ import UserMap from './components/UserMap';
 
 export default function App() {
   const [userLoc, setUserLoc] = useState(null);
+  const [userPlaces, setUserPlaces] = useState([]);
+
+
 
   const [test, setTest] = useState('initial word');
-
 
   function handleTest() {
     setTest('second word');
   }
 
+
+  
   const handleGetLocation = () => {
     console.log("Button Clicked");
     navigator.geolocation.getCurrentPosition(position => {
@@ -23,8 +27,36 @@ export default function App() {
         latitudeDelta: 0.00422,
         longitudeDelta: 0.00121,
       }); 
+      fetch('https://able-bedrock-282408.firebaseio.com/places.json', {
+        method: 'POST',
+        body: JSON.stringify({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        })
+      })
+      .then(res => console.log(res.json()))
+      .catch(err => console.log(err));
     }, err => {console.log(err);});
   };
+
+  const getUserPlacesHandler = () => {
+    fetch('https://able-bedrock-282408.firebaseio.com/places.json')
+      .then(res => res.json())
+      .then(parsedRes => {
+        const placesArray = [];
+        for (const key in parsedRes) {
+          placesArray.push({
+            latitude: parsedRes[key].latitude,
+            longitude: parsedRes[key].longitude,
+            id: key
+          });
+        }
+        setUserPlaces(placesArray);
+        console.log("Places array: ", placesArray)
+      })
+      .catch(err => console.log(err));
+  };
+
 
   return (
     <View style={styles.container}>
@@ -50,7 +82,7 @@ export default function App() {
         uri: "https://picsum.photos/200/300" 
       }} /> */}
 
-      <UserMap userLocation={userLoc}/>
+      <UserMap userLocation={userLoc} usersPlaces={userPlaces}/>
       
       <FetchLocation onGetLocation={handleGetLocation} />
 
@@ -58,7 +90,10 @@ export default function App() {
 
       <Text> {test} </Text>
 
-      <Button title="Click to Change Text" onPress={handleTest}/>       
+      <Button title="Click to Change Text" onPress={handleTest}/>     
+      <View style={{marginTop: 70}}>
+        <Button title="Click to get Places" onPress={getUserPlacesHandler}/>  
+      </View>
       
       {/* <MapView
         initialRegion={{

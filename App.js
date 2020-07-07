@@ -1,26 +1,47 @@
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View, Image } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, Image, Button } from 'react-native';
 import FetchLocation from './components/FetchLocation';
 import UserMap from './components/UserMap';
 
 export default function App() {
-  let lat = 0;
-  let long = 0;
-  let state = false;
+  const [userLoc, setUserLoc] = useState(null);
+
+  const [test, setTest] = useState('initial word');
+
+
+  function handleTest() {
+    setTest('second word');
+  }
 
   const handleGetLocation = () => {
     console.log("Button Clicked");
-    navigator.geolocation.getCurrentPosition(position => {console.log(position); lat = position.coords.latitude; long = position.coords.longitude; state = true}, err => {console.log(err);});
+    navigator.geolocation.getCurrentPosition(position => {
+      setUserLoc({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        latitudeDelta: 0.00422,
+        longitudeDelta: 0.00121,
+      }); 
+    }, err => {console.log(err);});
   };
 
   return (
     <View style={styles.container}>
-      {/* {!state && (<Text>No Latitude, No Longitude</Text>)}
-      {state && (<Text>Latitude: {lat}, Longitude: {long}</Text>)} */}
+      
+      {/*
+      
+        <button onClick={() => setUserLoc({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          latitudeDelta: 0.0622,
+          longitudeDelta: 0.0421
+        })}>
+    
+      */}
 
       {/* <Image source={require('./assets/favicon.png')} />
-      <FetchLocation onGetLocation={handleGetLocation} />
+      
       <Text>Open up App.js to start working on your app!!</Text> */}
 
       {/* <Image source={{ 
@@ -28,8 +49,16 @@ export default function App() {
         height: 300,
         uri: "https://picsum.photos/200/300" 
       }} /> */}
+
+      <UserMap userLocation={userLoc}/>
       
-      <UserMap />
+      <FetchLocation onGetLocation={handleGetLocation} />
+
+      <Text> Something </Text>
+
+      <Text> {test} </Text>
+
+      <Button title="Click to Change Text" onPress={handleTest}/>       
       
       {/* <MapView
         initialRegion={{

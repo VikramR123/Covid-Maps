@@ -1,0 +1,9 @@
+npm install react-native-maps --save-exact
+npm install react-native-swipe-up-down --save
+
+
+
+
+# Not used right now
+
+sudo npm install rn-sliding-up-panel --save-exact

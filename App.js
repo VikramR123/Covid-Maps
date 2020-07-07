@@ -1,12 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Image, Button } from 'react-native';
+import SwipeUpDown from 'react-native-swipe-up-down';
 import FetchLocation from './components/FetchLocation';
 import UserMap from './components/UserMap';
 
 export default function App() {
   const [userLoc, setUserLoc] = useState(null);
-  const [userPlaces, setUserPlaces] = useState([]);
+  const [userPlace, setUserPlace] = useState([]);
 
 
 
@@ -51,10 +52,24 @@ export default function App() {
             id: key
           });
         }
-        setUserPlaces(placesArray);
+        setUserPlace(placesArray);
         console.log("Places array: ", placesArray)
       })
       .catch(err => console.log(err));
+  };
+
+
+  const handleStates = () => {
+    console.log("Handling states");
+    var requestOptions = {
+      method: 'GET',
+      redirect: 'follow'
+    };
+    fetch('https://health-api.com/api/v1/covid-19/US/full', requestOptions)
+      .then(res => res.text())
+      .then(parsedRes => console.log(parsedRes))
+      .catch(err => console.log(err));
+    console.log("Done with states");
   };
 
 
@@ -82,7 +97,7 @@ export default function App() {
         uri: "https://picsum.photos/200/300" 
       }} /> */}
 
-      <UserMap userLocation={userLoc} usersPlaces={userPlaces}/>
+      <UserMap userLocation={userLoc} usersPlaces={userPlace}/>
       
       <FetchLocation onGetLocation={handleGetLocation} />
 
@@ -91,9 +106,26 @@ export default function App() {
       <Text> {test} </Text>
 
       <Button title="Click to Change Text" onPress={handleTest}/>     
-      <View style={{marginTop: 70}}>
+      <View style={{marginTop: 80}}>
         <Button title="Click to get Places" onPress={getUserPlacesHandler}/>  
       </View>
+
+      <Button title="Click to get States" onPress={handleStates}/>
+
+      <SwipeUpDown		
+        itemMini={
+          <View style={{ alignItems: 'center' }}>
+            <Text>This is the mini view, swipe up!</Text>
+          </View>
+        } // Pass props component when collapsed
+        //itemFull={<ItemFull />} // Pass props component when show full
+        onShowMini={() => console.log('mini')}
+        onShowFull={() => console.log('full')}
+        onMoveDown={() => console.log('down')}
+        onMoveUp={() => console.log('up')}
+        disablePressToShow={false} // Press item mini to show full
+        style={{ backgroundColor: 'green' }} // style for swipe
+      />
       
       {/* <MapView
         initialRegion={{

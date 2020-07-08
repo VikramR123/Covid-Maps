@@ -1,5 +1,24 @@
 npm install react-native-maps --save-exact
 npm install react-native-swipe-up-down --save
+npm install @expo/vector-icons
+
+
+sudo npm install -g @ionic/cli
+
+npm install react-native-ionicons@^4.x
+
+
+
+npm install --save react-native-vector-icons
+
+npm install react-native-search-bar --save
+npm i react-native-dynamic-search-bar
+
+
+
+
+
+npm install react-native-elements
 
 
 

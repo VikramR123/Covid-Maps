@@ -1,6 +1,8 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Dimensions } from 'react-native';
 import MapView from 'react-native-maps';
+
+const { width, height } = Dimensions.get('screen');
 
 const userMap = props => {
     let userLocMarker = null;
@@ -29,9 +31,9 @@ const userMap = props => {
 
 const styles = StyleSheet.create({
     container: {
-      ...StyleSheet.absoluteFillObject,
-      height: 400,
-      width: 400,
+      //...StyleSheet.absoluteFillObject,
+      height: 0.6 * height,
+      width: width,
       justifyContent: 'flex-end',
       alignItems: 'center',
     },

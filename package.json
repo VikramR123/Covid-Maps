@@ -6,6 +6,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo/vector-icons": "^10.2.0",
     "expo": "~38.0.8",
     "expo-splash-screen": "~0.3.1",
     "expo-status-bar": "^1.0.2",
@@ -13,12 +14,17 @@
     "react": "~16.11.0",
     "react-dom": "~16.11.0",
     "react-native": "~0.62.2",
+    "react-native-dynamic-search-bar": "^1.2.1",
+    "react-native-elements": "^2.0.4",
     "react-native-gesture-handler": "~1.6.1",
+    "react-native-ionicons": "^4.6.5",
     "react-native-maps": "0.27.1",
     "react-native-reanimated": "~1.9.0",
     "react-native-screens": "~2.9.0",
+    "react-native-search-bar": "^3.5.1",
     "react-native-swipe-up-down": "^1.0.7",
     "react-native-unimodules": "~0.10.1",
+    "react-native-vector-icons": "^7.0.0",
     "react-native-web": "~0.11.7",
     "rn-sliding-up-panel": "2.4.2"
   },

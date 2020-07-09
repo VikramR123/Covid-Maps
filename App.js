@@ -1,22 +1,29 @@
 import { StatusBar, setStatusBarBackgroundColor } from 'expo-status-bar';
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Image, Button, Dimensions, Platform } from 'react-native';
+import { StyleSheet, Text, View, Image, Button, Dimensions, Platform, SafeAreaView, ScrollView, ActivityIndicator } from 'react-native';
 import SwipeUpDown from 'react-native-swipe-up-down';
 import FetchLocation from './components/FetchLocation';
 import UserMap from './components/UserMap';
+import LocationItem from './components/LocationItem';
 //import { SearchBar } from 'react-native-elements';
-import { TextInput } from 'react-native-gesture-handler';
-//import Icon from 'react-native-ionicons';
-import { Ionicons } from '@expo/vector-icons';
+import { TextInput } from 'react-native-gesture-handler'
 import Icon from 'react-native-vector-icons/Ionicons';
-//import Ionicons from 'react-native-vector-icons/Ionicons';
-//import SearchBar from 'react-native-search-bar';
+//import { GoogleAutoComplete } from 'react-native-google-autocomplete';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+//import GooglePlacesInput from './components/GooglePlacesInput';
+
 
 const { width, height } = Dimensions.get('screen');
+
+const homePlace = { description: 'Home', geometry: { location: { lat: 48.8152937, lng: 2.4597668 } }};
+const workPlace = { description: 'Work', geometry: { location: { lat: 48.8496818, lng: 2.2940881 } }};
+
+
 export default function App() {
   const [userLoc, setUserLoc] = useState(null);
   const [userPlace, setUserPlace] = useState([]);
   const [search, setSearch] = useState('');
+
 
   //const search2 = React.createRef();
 
@@ -81,31 +88,134 @@ export default function App() {
 
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.StatusBar}>
+      </View>
+
+      <View style={{position: 'absolute', top: (Platform.OS === 'ios') ? 18 : 0, flex:1, height: height*0.55, width: width }}>
+        <UserMap userLocation={userLoc} usersPlaces={userPlace}/>
+      </View>
       
+      <View style={styles.searchBar}>
+        <GooglePlacesAutocomplete
+          placeholder='Search'
+          minLength={2} // minimum length of text to search
+          autoFocus={false}
+          returnKeyType={'search'} // Can be left out for default return key https://facebook.github.io/react-native/docs/textinput.html#returnkeytype
+          keyboardAppearance={'light'} // Can be left out for default keyboardAppearance https://facebook.github.io/react-native/docs/textinput.html#keyboardappearance
+          listViewDisplayed='auto'    // true/false/undefined
+          fetchDetails={true}
+          renderDescription={row => row.description} // custom description render
+          onPress={(data, details = null) => { // 'details' is provided when fetchDetails = true
+            console.log(data, details);
+          }}
+    
+          getDefaultValue={() => ''}
+    
+          query={{
+            // available options: https://developers.google.com/places/web-service/autocomplete
+            key: 'AIzaSyB2q7MRRBxVMpB8Sz-BFEDrSp9WPjzX0tw',
+            language: 'en', // language of the results
+            types: '(cities)' // default: 'geocode'
+          }}
+    
+          styles={{
+            textInputContainer: {
+              width: '100%'
+            },
+            description: {
+              fontWeight: 'bold'
+            },
+            predefinedPlacesDescription: {
+              color: '#1faadb'
+            }
+          }}
+    
+          currentLocation={true} // Will add a 'Current location' button at the top of the predefined places list
+          currentLocationLabel="Current location"
+          nearbyPlacesAPI='GooglePlacesSearch' // Which API to use: GoogleReverseGeocoding or GooglePlacesSearch
+          GoogleReverseGeocodingQuery={{
+            // available options for GoogleReverseGeocoding API : https://developers.google.com/maps/documentation/geocoding/intro
+          }}
+          GooglePlacesSearchQuery={{
+            // available options for GooglePlacesSearch API : https://developers.google.com/places/web-service/search
+            rankby: 'distance',
+            type: 'cafe'
+          }}
+          
+          GooglePlacesDetailsQuery={{
+            // available options for GooglePlacesDetails API : https://developers.google.com/places/web-service/details
+            fields: 'formatted_address',
+          }}
+    
+          filterReverseGeocodingByTypes={['locality', 'administrative_area_level_3']} // filter the reverse geocoding results by types - ['locality', 'administrative_area_level_3'] if you want to display only cities
+          predefinedPlaces={[homePlace, workPlace]}
+    
+          debounce={200} // debounce the requests in ms. Set to 0 to remove debounce. By default 0ms.
+          // renderLeftButton={()  => <Image source={require('path/custom/left-icon')} />}
+          // renderRightButton={() => <Text>Custom text after the input</Text>}
+        />
+      </View>
 
-      <UserMap userLocation={userLoc} usersPlaces={userPlace}/>
 
-      <View style={styles.searchBox}>
+      {/* <GoogleAutoComplete apiKey={'AIzaSyCc7foIJ7JeyQHdeZ_F7O03_qIoZPwLvcU'} debounce={500} minLength={3}>
+        {({
+          handleTextChange,
+          locationResults,
+          fetchDetails,
+          isSearching,
+          inputValue,
+          clearSearchs
+        }) => (
+          <React.Fragment>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Search a places"
+                onChangeText={handleTextChange}
+                value={inputValue}
+              />
+              <Button title="Clear" onPress={clearSearchs} />
+            </View>
+            {isSearching && <ActivityIndicator size="large" color="red" />}
+            <ScrollView>
+              {locationResults.map(el => (
+                <LocationItem
+                  {...el}
+                  key={el.id}
+                  fetchDetails={fetchDetails}
+                />
+              ))}
+            </ScrollView>
+          </React.Fragment>
+        )}
+      </GoogleAutoComplete> */}
+
+      {/* <View style={styles.searchBox}>
         <TextInput
           placeholder="Search Here"
           placeholderTextColor="#000"
           autoCapitalize="none"
           style={{flex:1,padding:0}}
         />
-        <Icon name="md-menu" size={20} color='black' />
-      </View>
+        
+
+        <Icon name="ios-search" size={20} color='black' />
+      </View> */}
       
-      <FetchLocation onGetLocation={handleGetLocation} />
+      <View style={{paddingTop: height*0.55}}> 
+        <FetchLocation onGetLocation={handleGetLocation} />
 
-      <Text> somethings </Text>
+        <Text> somethings </Text>
 
-  
-      <View style={{marginTop: 80}}>
-        <Button title="Click to get Places" onPress={getUserPlacesHandler}/>  
+
+        <View style={{marginTop: 80}}>
+          <Button title="Click to get Places" onPress={getUserPlacesHandler}/>  
+        </View>
+
+        <Button title="Click to get States" onPress={handleStates}/>
       </View>
 
-      <Button title="Click to get States" onPress={handleStates}/>
 
       <SwipeUpDown		
         itemMini={
@@ -132,7 +242,7 @@ export default function App() {
         onMoveDown={() => console.log('down')}
         onMoveUp={() => console.log('up')}
         disablePressToShow={false} // Press item mini to show full
-        style={{ backgroundColor: 'lavender' }} // style for swipe
+        style={{ backgroundColor: '#c3f2dc' }} // style for swipe
         animation={'easeInEaseOut'}
         swipeHeight={60}
       />
@@ -147,7 +257,7 @@ export default function App() {
       /> */}
 
       <StatusBar style="auto" />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -156,33 +266,33 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'coral',
+    backgroundColor: '#4b6075', //Sailor Blue with Mint swipeUp
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  StatusBar: {
+    height: (Platform.OS === 'ios') ? 18 : 0, //this is just to test if the platform is iOS to give it a height of 18, else, no height (Android apps have their own status bar)
+    backgroundColor: "white",
   },
   header: {
     flex: 1,
     justifyContent: 'center',
   },
   searchBar: {
-    flex:3,
-    height: .1 * height,
-    width: width,
-    color: 'black',
-  },
-  searchBox: {
+    flex: 1,
     position: 'absolute',
-    marginTop: Platform.OS === 'ios' ? 40 : 20,
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    width: '90%',
-    alignSelf: 'center',
-    borderRadius: 5,
-    padding: 10,
-    shadowColor: '#ccc',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.5,
-    shadowRadius: 5,
-    elevation: 10
-  }
+    top: (Platform.OS === 'ios') ? 32 : 0, // Normally 18 : 0 to align to very top below StatusBar, but added cushion for style
+    width: width * 0.9,
+    height: height
+  },
+  textInput: {
+    height: 40,
+    width: 300,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+  },
+  inputWrapper: {
+    marginTop: 80,
+    flexDirection: 'row'
+  },
 });

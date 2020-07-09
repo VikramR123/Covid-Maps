@@ -10,26 +10,21 @@ import { TextInput } from 'react-native-gesture-handler'
 import Icon from 'react-native-vector-icons/Ionicons';
 //import { GoogleAutoComplete } from 'react-native-google-autocomplete';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-//import GooglePlacesInput from './components/GooglePlacesInput';
-
+import { config } from './config.js';
 
 const { width, height } = Dimensions.get('screen');
 
 const homePlace = { description: 'Home', geometry: { location: { lat: 48.8152937, lng: 2.4597668 } }};
 const workPlace = { description: 'Work', geometry: { location: { lat: 48.8496818, lng: 2.2940881 } }};
 
+// To protect API key
+var PLACES_API_KEY = config.PLACES_AUTOCOMPLETE_KEY;
+
 
 export default function App() {
   const [userLoc, setUserLoc] = useState(null);
   const [userPlace, setUserPlace] = useState([]);
-  const [search, setSearch] = useState('');
-
-
-  //const search2 = React.createRef();
-
-  const updateSearch = (input) => {
-    setSearch({ input });
-  };
+  
 
   
   const handleGetLocation = () => {
@@ -114,7 +109,7 @@ export default function App() {
     
           query={{
             // available options: https://developers.google.com/places/web-service/autocomplete
-            key: 'AIzaSyB2q7MRRBxVMpB8Sz-BFEDrSp9WPjzX0tw',
+            key: PLACES_API_KEY,
             language: 'en', // language of the results
             types: '(cities)' // default: 'geocode'
           }}
@@ -155,53 +150,11 @@ export default function App() {
           // renderLeftButton={()  => <Image source={require('path/custom/left-icon')} />}
           // renderRightButton={() => <Text>Custom text after the input</Text>}
         />
+
+        {/* <Icon name="ios-search" size={20} color='black' /> */}
       </View>
+      
 
-
-      {/* <GoogleAutoComplete apiKey={'AIzaSyCc7foIJ7JeyQHdeZ_F7O03_qIoZPwLvcU'} debounce={500} minLength={3}>
-        {({
-          handleTextChange,
-          locationResults,
-          fetchDetails,
-          isSearching,
-          inputValue,
-          clearSearchs
-        }) => (
-          <React.Fragment>
-            <View style={styles.inputWrapper}>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Search a places"
-                onChangeText={handleTextChange}
-                value={inputValue}
-              />
-              <Button title="Clear" onPress={clearSearchs} />
-            </View>
-            {isSearching && <ActivityIndicator size="large" color="red" />}
-            <ScrollView>
-              {locationResults.map(el => (
-                <LocationItem
-                  {...el}
-                  key={el.id}
-                  fetchDetails={fetchDetails}
-                />
-              ))}
-            </ScrollView>
-          </React.Fragment>
-        )}
-      </GoogleAutoComplete> */}
-
-      {/* <View style={styles.searchBox}>
-        <TextInput
-          placeholder="Search Here"
-          placeholderTextColor="#000"
-          autoCapitalize="none"
-          style={{flex:1,padding:0}}
-        />
-        
-
-        <Icon name="ios-search" size={20} color='black' />
-      </View> */}
       
       <View style={{paddingTop: height*0.55}}> 
         <FetchLocation onGetLocation={handleGetLocation} />
@@ -281,7 +234,7 @@ const styles = StyleSheet.create({
   searchBar: {
     flex: 1,
     position: 'absolute',
-    top: (Platform.OS === 'ios') ? 32 : 0, // Normally 18 : 0 to align to very top below StatusBar, but added cushion for style
+    top: (Platform.OS === 'ios') ? 32 : 15, // Normally 18 : 0 to align to very top below StatusBar, but added cushion for style
     width: width * 0.9,
     height: height
   },

@@ -5,12 +5,11 @@ import SwipeUpDown from 'react-native-swipe-up-down';
 import FetchLocation from './components/FetchLocation';
 import UserMap from './components/UserMap';
 import LocationItem from './components/LocationItem';
-//import { SearchBar } from 'react-native-elements';
 import { TextInput } from 'react-native-gesture-handler'
 import Icon from 'react-native-vector-icons/Ionicons';
-//import { GoogleAutoComplete } from 'react-native-google-autocomplete';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { config } from './config.js';
+import Geocoder from 'react-native-geocoding';
 
 const { width, height } = Dimensions.get('screen');
 
@@ -24,6 +23,10 @@ var PLACES_API_KEY = config.PLACES_AUTOCOMPLETE_KEY;
 export default function App() {
   const [userLoc, setUserLoc] = useState(null);
   const [userPlace, setUserPlace] = useState([]);
+
+  const [searchVal, setSearchVal] = useState('');
+
+  Geocoder.init(config.PLACES_AUTOCOMPLETE_KEY);
   
 
   
@@ -80,6 +83,22 @@ export default function App() {
     console.log("Done with states");
   };
 
+  
+  const handleGoToAddress = (address) => {
+    Geocoder.from(address)
+      .then(json => {
+          var location = json.results[0].geometry.location;
+          //console.log("Lat: ", location.lat);
+          setUserLoc({
+            latitude: location.lat,
+            longitude: location.lng,
+            latitudeDelta: 0.0422,
+            longitudeDelta: 0.0121,
+          }); 
+      })
+      .catch(error => console.warn(error));
+  };
+
 
 
   return (
@@ -90,6 +109,7 @@ export default function App() {
       <View style={{position: 'absolute', top: (Platform.OS === 'ios') ? 18 : 0, flex:1, height: height*0.55, width: width }}>
         <UserMap userLocation={userLoc} usersPlaces={userPlace}/>
       </View>
+
       
       <View style={styles.searchBar}>
         <GooglePlacesAutocomplete
@@ -102,7 +122,9 @@ export default function App() {
           fetchDetails={true}
           renderDescription={row => row.description} // custom description render
           onPress={(data, details = null) => { // 'details' is provided when fetchDetails = true
-            console.log(data, details);
+            console.log("Data: ", data, " ,Details: ", details);
+            setSearchVal(details.formatted_address);
+            handleGoToAddress(details.formatted_address);
           }}
     
           getDefaultValue={() => ''}
@@ -144,8 +166,9 @@ export default function App() {
           }}
     
           filterReverseGeocodingByTypes={['locality', 'administrative_area_level_3']} // filter the reverse geocoding results by types - ['locality', 'administrative_area_level_3'] if you want to display only cities
-          predefinedPlaces={[homePlace, workPlace]}
+          //predefinedPlaces={[homePlace, workPlace]}
     
+          enablePoweredByContainer={false}
           debounce={200} // debounce the requests in ms. Set to 0 to remove debounce. By default 0ms.
           // renderLeftButton={()  => <Image source={require('path/custom/left-icon')} />}
           // renderRightButton={() => <Text>Custom text after the input</Text>}
@@ -156,10 +179,10 @@ export default function App() {
       
 
       
-      <View style={{paddingTop: height*0.55}}> 
+      {/* <View style={{paddingTop: height*0.55}}> 
         <FetchLocation onGetLocation={handleGetLocation} />
 
-        <Text> somethings </Text>
+        <Text> Address is: {searchVal} </Text>
 
 
         <View style={{marginTop: 80}}>
@@ -167,7 +190,7 @@ export default function App() {
         </View>
 
         <Button title="Click to get States" onPress={handleStates}/>
-      </View>
+      </View> */}
 
 
       <SwipeUpDown		
@@ -200,14 +223,7 @@ export default function App() {
         swipeHeight={60}
       />
       
-      {/* <MapView
-        initialRegion={{
-          latitude: 37.78825,
-          longitude: -122.4324,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
-      /> */}
+
 
       <StatusBar style="auto" />
     </SafeAreaView>
@@ -236,7 +252,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: (Platform.OS === 'ios') ? 32 : 15, // Normally 18 : 0 to align to very top below StatusBar, but added cushion for style
     width: width * 0.9,
-    height: height
+    //height: height  * 0.35 // To cut off the "Powered by Google" banner at bottom
   },
   textInput: {
     height: 40,

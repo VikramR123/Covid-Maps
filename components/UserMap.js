@@ -15,6 +15,10 @@ const userMap = props => {
         // <View style={styles.container}>
             <MapView
                 style={styles.map}
+                enableZoomControl={true}
+                showsUserLocation = {true}
+                showsMyLocationButton = {true}
+                zoomEnabled = {true}
                 initalRegion={{
                     latitude: 37.78825,
                     longitude: -122.4324,

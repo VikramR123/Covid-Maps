@@ -1,10 +1,9 @@
 npm install react-native-maps --save-exact
 npm install react-native-swipe-up-down --save
 npm install --save react-native-vector-icons
-
-npm install react-native-google-autocomplete --save
-
 npm install react-native-google-places-autocomplete --save
+
+npm install --save react-native-geocoding
 
 
 

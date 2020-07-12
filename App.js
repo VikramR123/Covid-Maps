@@ -10,6 +10,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { config } from './config.js';
 import Geocoder from 'react-native-geocoding';
+import { apisAreAvailable } from 'expo';
+
 
 const { width, height } = Dimensions.get('screen');
 
@@ -26,8 +28,9 @@ export default function App() {
 
   const [searchVal, setSearchVal] = useState('');
 
+  const [active, setActive] = useState('first');
+
   Geocoder.init(config.PLACES_AUTOCOMPLETE_KEY);
-  
 
   
   const handleGetLocation = () => {
@@ -39,15 +42,16 @@ export default function App() {
         latitudeDelta: 0.00422,
         longitudeDelta: 0.00121,
       }); 
-      fetch('https://able-bedrock-282408.firebaseio.com/places.json', {
-        method: 'POST',
-        body: JSON.stringify({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        })
-      })
-      .then(res => console.log(res.json()))
-      .catch(err => console.log(err));
+
+    //   fetch('https://able-bedrock-282408.firebaseio.com/places.json', {
+    //     method: 'POST',
+    //     body: JSON.stringify({
+    //       latitude: position.coords.latitude,
+    //       longitude: position.coords.longitude,
+    //     })
+    //   })
+    //   .then(res => console.log(res.json()))
+    //   .catch(err => console.log(err));
     }, err => {console.log(err);});
   };
 
@@ -177,23 +181,57 @@ export default function App() {
         {/* <Icon name="ios-search" size={20} color='black' /> */}
       </View>
       
+      <View style={styles.tabs}>
+        <View style={[
+          styles.tab,
+          (active === 'first') ? styles.activeTab : null
+          ]}>
+          <Text style={[
+            styles.tabTitle,
+            active === 'first' ? styles.activeTabTitle : null
+            ]} onPress={() => setActive('first')}> General News </Text>
+        </View>
+        <View style={[
+          styles.tab,
+          (active === 'second') ? styles.activeTab : null
+          ]}>
+          <Text style={[
+            styles.tabTitle,
+            active === 'second' ? styles.activeTabTitle : null
+            ]} onPress={() => setActive('second')}> Specific Area </Text>
+        </View>
+        <View style={[
+          styles.tab,
+          (active === 'third') ? styles.activeTab : null
+          ]}>
+          <Text style={[
+            styles.tabTitle,
+            active === 'third' ? styles.activeTabTitle : null
+            ]} onPress={() => setActive('third')}> Your Location </Text>
+        </View>
+      </View>
+
+
 
       
-      {/* <View style={{paddingTop: height*0.55}}> 
+      <View style={styles.bottomBar}> 
+
+        
+        <Text> NeededL General News section, Go TO current loc button and get stats, then County, State, Country,  </Text>
         <FetchLocation onGetLocation={handleGetLocation} />
 
         <Text> Address is: {searchVal} </Text>
 
 
-        <View style={{marginTop: 80}}>
+        {/* <View style={{marginTop: 80}}>
           <Button title="Click to get Places" onPress={getUserPlacesHandler}/>  
         </View>
 
-        <Button title="Click to get States" onPress={handleStates}/>
-      </View> */}
+        <Button title="Click to get States" onPress={handleStates}/> */}
+      </View>
 
-
-      <SwipeUpDown		
+      
+      {/* <SwipeUpDown		
         itemMini={
           <View style={{ alignItems: 'center' }}>
             <Text>This is the mini view, swipe up!</Text>
@@ -201,16 +239,12 @@ export default function App() {
         } // Pass props component when collapsed
         itemFull={
           <View style={styles.panelContainer}>
-            {/* <SearchBar
-              placeholder="Type Here..."
-              onChangeText={updateSearch}
-              value={search}
-            /> */}
-            {/* <SearchBar platform='ios' cancelButtonTitle='Cancel' onChangeText={(search) => { updateSearch(search) }} value={search} /> */}
+            
+            
             <Text style={styles.instructions}>
               Swipe down to close
             </Text>
-            {/* <Text style={styles.instructions}> The search was: {search} </Text> */}
+            
           </View>
         } // Pass props component when show full
         onShowMini={() => console.log('mini')}
@@ -221,7 +255,7 @@ export default function App() {
         style={{ backgroundColor: '#c3f2dc' }} // style for swipe
         animation={'easeInEaseOut'}
         swipeHeight={60}
-      />
+      /> */}
       
 
 
@@ -264,4 +298,48 @@ const styles = StyleSheet.create({
     marginTop: 80,
     flexDirection: 'row'
   },
+  panelContainer: {
+    //
+  },
+  tab:{
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: height * 0.05,
+    //paddingHorizontal: 14,
+    //backgroundColor: 'red'
+    //paddingBottom: 80
+  },
+  tabs: {
+    //flex: 1,
+    position: 'absolute',
+    flexDirection: 'row',
+    width: width,
+    height: height * 0.05,
+    top: (Platform.OS === 'ios') ? height * 0.55 + 19 : height * 0.55 + 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    backgroundColor: '#c3f2dc', // Mint
+    borderWidth: 3,
+    borderColor: '#00203FFF' // Darker Sailor Blue
+  },
+  tabTitle: {
+    fontWeight: 'bold',
+  },
+  activeTab: {
+    borderBottomColor: 'orange',
+    borderBottomWidth: 3
+  },
+  activeTabTitle: {
+    color: 'orange',
+  },
+  bottomBar: {
+    flex: 1,
+    position: 'absolute',
+    width: width,
+    height: height * 0.40,
+    top: (Platform.OS === 'ios') ? height*0.60 + 19 : height*0.60 + 1,
+    backgroundColor: '#4b6075'}
 });

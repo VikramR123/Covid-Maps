@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions, Image, TouchableOpacity } from 'react-native';
 import MapView from 'react-native-maps';
 
 const { width, height } = Dimensions.get('screen');
@@ -8,7 +8,12 @@ const userMap = props => {
     let userLocMarker = null;
 
     if (props.userLocation) {
-        userLocMarker = <MapView.Marker coordinate={props.userLocation} />
+        userLocMarker = <MapView.Marker coordinate={props.userLocation} image={require('../assets/red_marker.png')} onPress={() => alert('Marker clicked')} />
+            {/* <Image style={{flex: 1, position: 'absolute', resizeMode: 'contain', width: 40, height: 40}} source={require('../assets/red_marker.png')}/> */}
+            {/* <TouchableOpacity onPress={() => alert('image clicked')}>
+                <Image style={{flex: 1, position: 'absolute', resizeMode: 'contain', width: 40, height: 40}} source={require('../assets/red_marker.png')}/>
+            </TouchableOpacity> */}
+        {/* </MapView.Marker> */}
     }
     const usersMarkers = props.usersPlaces.map(userPlace => <MapView.Marker coordinate={userPlace} key={userPlace.id}/>)
     return (

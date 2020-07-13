@@ -3,11 +3,9 @@ npm install react-native-swipe-up-down --save
 npm install --save react-native-vector-icons
 npm install react-native-google-places-autocomplete --save
 npm install --save react-native-geocoding
-
-
-
-
 npm install native-base --save
+npm install moment --save
+npm install --save react-native-webview
 
 
 

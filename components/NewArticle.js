@@ -1,10 +1,18 @@
 import React from 'react';
 import { Text, View, StyleSheet} from 'react-native';
 import { ListItem, Thumbnail, Left, Body, Right, Button as Button1 } from 'native-base';
+import moment from 'moment';
 
 
 const newsArticle = props => {
     var data = props.article;
+    const time = moment( data.publishedAt || moment.now() ).fromNow();
+
+    handlePress = () => {
+        const {url, title} = data;
+        return props.onPress({url, title});
+    }
+
     //console.log("data: ", data);
     return (
         <ListItem thumbnail>
@@ -16,12 +24,12 @@ const newsArticle = props => {
                 <Text note numberOfLines={2} style={{color: 'gray'}}>{data.content}</Text>
                 <View style={{flex: 1, flexDirection: 'row', marginTop: 8}}>
                     <Text style={{color: 'gray'}}> {data.source.name} </Text>
-                    <Text style={{color: 'gray'}}> {data.publishedAt} </Text>
+                    <Text style={{color: 'gray', marginHorizontal: 10}}> {time} </Text>
                 </View>
             </Body>
             <Right>
-                <Button1 transparent>
-                    <Text>View</Text>
+                <Button1 transparent onPress={handlePress}>
+                    <Text style={{color: '#0000EE'}}>View</Text>
                 </Button1>
             </Right>
         </ListItem>

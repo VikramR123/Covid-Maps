@@ -9,12 +9,11 @@ import Geocoder from 'react-native-geocoding';
 import { ListItem, Thumbnail, Left, Body, Right, Button as Button1, Container, Content, List } from 'native-base';
 import NewsArticle from './components/NewArticle';
 import { getArticles } from './service/news';
+import Modal from './components/Modal';
 
 
 const { width, height } = Dimensions.get('screen');
 
-const homePlace = { description: 'Home', geometry: { location: { lat: 48.8152937, lng: 2.4597668 } }};
-const workPlace = { description: 'Work', geometry: { location: { lat: 48.8496818, lng: 2.2940881 } }};
 
 // To protect API key
 var PLACES_API_KEY = config.PLACES_AUTOCOMPLETE_KEY;
@@ -22,17 +21,19 @@ var NEWS__API = config.NEWS_API;
 
 
 export default function App() {
-  const [userLoc, setUserLoc] = useState(null);
+  const [userLoc, setUserLoc] = useState(null); // Tracks users' coords
   const [searchLoc, setSearchLoc] = useState(null);
 
-  const [userPlace, setUserPlace] = useState([]);
+  const [userPlace, setUserPlace] = useState([]); // Tracks users' coords
 
-  const [searchVal, setSearchVal] = useState('');
+  const [searchVal, setSearchVal] = useState(''); // Used to get search value
 
-  const [active, setActive] = useState('first');
+  const [active, setActive] = useState('first'); // Selects which of the three tabs is showing
 
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(false); // Not used currently
   const [data, setData] = useState(null); // The news article list
+  const [modalVisible, setModalVisibility] = useState(false); // The modal is the pop-up of news article
+  const [modalData, setModalData] = useState({});
 
   // The functional component version of componentDidMount() - runs every render, except only once because []
   useEffect(() => {
@@ -40,10 +41,21 @@ export default function App() {
     getArticles().then(data => setData(data));
   }, [])
 
+
+  function handleItemDataOnPress(articleData) {
+    setModalVisibility(true);
+    setModalData(articleData);
+  }
+
+  function handleModalOnClose() {
+    setModalVisibility(false);
+    setModalData({});
+  }
+
+
   Geocoder.init(config.PLACES_AUTOCOMPLETE_KEY);
 
 
-  
   
   const handleGetLocation = () => {
     console.log("Button Clicked");
@@ -141,38 +153,21 @@ export default function App() {
       return(
         <Container>
           {/* <Content> */}
-            <List 
-              dataArray={data}
-              renderRow={(item) => {
-                return <NewsArticle article={item}/>
-              }}
-              keyExtractor={(item, index) => index.toString()}
-            />
+          <List 
+            dataArray={data}
+            renderRow={(item) => {
+              return <NewsArticle onPress={handleItemDataOnPress} article={item}/>
+            }}
+            keyExtractor={(item, index) => index.toString()}
+          />
           {/* </Content> */}
+          <Modal 
+            showModel={modalVisible}
+            articleData={modalData}
+            onCloseWindow={handleModalOnClose}
+          />
         </Container>
       )
-
-
-      // <ScrollView contentContainerStyle={{marginVertical: 10}}>
-      //   <View style={styles.newsArticle}>
-      //     {/* <Image style={{width: 90, height: 90, top: 10, left: 10}} source={{uri: 'https://i.kinja-img.com/gawker-media/image/upload/c_fill,f_auto,fl_progressive,g_center,h_675,pg_1,q_80,w_1200/aw2yhexoukminlsbrk94.jpg'}}/> 
-      //     <Text> SOmething </Text> */}
-
-          
-
-      //     {/* <View style={{backgroundColor: 'red', width: '20%', height: '100%'}}>
-      //       <Image style={{width: 60, height: 60, top: 10, left: 10}} source={{uri: 'https://i.kinja-img.com/gawker-media/image/upload/c_fill,f_auto,fl_progressive,g_center,h_675,pg_1,q_80,w_1200/aw2yhexoukminlsbrk94.jpg'}}/> 
-      //     </View>
-      //     <View style={{flex: 1, backgroundColor: 'pink', width: '60%', height: '100%', left: 80}}>
-      //       <Text> SOmething </Text>
-      //     </View> */}
-      //   </View>
-      //   <View style={styles.newsArticle}>
-      //     <Text> SOmething </Text>
-      //   </View>
-        
-      // </ScrollView>
-
     }
     else if (active == 'second') {
       return(

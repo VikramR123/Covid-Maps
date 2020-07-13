@@ -5,16 +5,12 @@ import MapView from 'react-native-maps';
 const { width, height } = Dimensions.get('screen');
 
 const userMap = props => {
-    let userLocMarker = null;
+    let searchLocMarker = null;
 
-    if (props.userLocation) {
-        userLocMarker = <MapView.Marker coordinate={props.userLocation} image={require('../assets/red_marker.png')} onPress={() => alert('Marker clicked')} />
-            {/* <Image style={{flex: 1, position: 'absolute', resizeMode: 'contain', width: 40, height: 40}} source={require('../assets/red_marker.png')}/> */}
-            {/* <TouchableOpacity onPress={() => alert('image clicked')}>
-                <Image style={{flex: 1, position: 'absolute', resizeMode: 'contain', width: 40, height: 40}} source={require('../assets/red_marker.png')}/>
-            </TouchableOpacity> */}
-        {/* </MapView.Marker> */}
+    if (props.searchLocation) {
+        searchLocMarker = <MapView.Marker coordinate={props.searchLocation} image={require('../assets/red_marker.png')} onPress={props.onPressMarker} />
     }
+    
     const usersMarkers = props.usersPlaces.map(userPlace => <MapView.Marker coordinate={userPlace} key={userPlace.id}/>)
     return (
         // <View style={styles.container}>
@@ -30,8 +26,8 @@ const userMap = props => {
                     latitudeDelta: 0.0622,
                     longitudeDelta: 0.0421,
                 }}
-                region={props.userLocation}>
-                    {userLocMarker}
+                region={(props.activeTab === 'third') ? props.userLocation : props.searchLocation}>
+                    {searchLocMarker}
                     {usersMarkers}
             </MapView>
         // {/* </View> */}

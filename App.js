@@ -1,16 +1,14 @@
 import { StatusBar, setStatusBarBackgroundColor } from 'expo-status-bar';
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, Image, Button, Dimensions, Platform, SafeAreaView, ScrollView, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, Image, Button, Dimensions, Platform, SafeAreaView, ScrollView, ActivityIndicator, FlatList } from 'react-native';
 import SwipeUpDown from 'react-native-swipe-up-down';
-import FetchLocation from './components/FetchLocation';
 import UserMap from './components/UserMap';
-import LocationItem from './components/LocationItem';
-import { TextInput } from 'react-native-gesture-handler'
-import Icon from 'react-native-vector-icons/Ionicons';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { config } from './config.js';
 import Geocoder from 'react-native-geocoding';
-import { apisAreAvailable } from 'expo';
+import { ListItem, Thumbnail, Left, Body, Right, Button as Button1, Container, Content, List } from 'native-base';
+import NewsArticle from './components/NewArticle';
+import { getArticles } from './service/news';
 
 
 const { width, height } = Dimensions.get('screen');
@@ -20,18 +18,32 @@ const workPlace = { description: 'Work', geometry: { location: { lat: 48.8496818
 
 // To protect API key
 var PLACES_API_KEY = config.PLACES_AUTOCOMPLETE_KEY;
+var NEWS__API = config.NEWS_API;
 
 
 export default function App() {
   const [userLoc, setUserLoc] = useState(null);
+  const [searchLoc, setSearchLoc] = useState(null);
+
   const [userPlace, setUserPlace] = useState([]);
 
   const [searchVal, setSearchVal] = useState('');
 
   const [active, setActive] = useState('first');
 
+  const [isLoading, setLoading] = useState(false);
+  const [data, setData] = useState(null); // The news article list
+
+  // The functional component version of componentDidMount() - runs every render, except only once because []
+  useEffect(() => {
+    setLoading(true);
+    getArticles().then(data => setData(data));
+  }, [])
+
   Geocoder.init(config.PLACES_AUTOCOMPLETE_KEY);
 
+
+  
   
   const handleGetLocation = () => {
     console.log("Button Clicked");
@@ -42,6 +54,7 @@ export default function App() {
         latitudeDelta: 0.00422,
         longitudeDelta: 0.00121,
       }); 
+      // BELOW : Post to Firebase DB
 
     //   fetch('https://able-bedrock-282408.firebaseio.com/places.json', {
     //     method: 'POST',
@@ -93,7 +106,7 @@ export default function App() {
       .then(json => {
           var location = json.results[0].geometry.location;
           //console.log("Lat: ", location.lat);
-          setUserLoc({
+          setSearchLoc({
             latitude: location.lat,
             longitude: location.lng,
             latitudeDelta: 0.0422,
@@ -104,14 +117,94 @@ export default function App() {
   };
 
 
+  function switchToSearch() { // This will switch the active tab to second when searching
+    if (active != 'second') {
+      //alert('Marker clicked');
+      setActive('second');
+    }
+  }
+  
+
+  function pressMarker() {  // This will handle exclusively tapping the marker
+    if (active != 'second') {
+      setActive('second');
+    }
+    alert('Marker clicked');
+  };
+
+
+
+
+
+  function returnScrollView() {  // This returns the correct scroll view based on the selected tab
+    if (active == 'first') {
+      return(
+        <Container>
+          {/* <Content> */}
+            <List 
+              dataArray={data}
+              renderRow={(item) => {
+                return <NewsArticle article={item}/>
+              }}
+              keyExtractor={(item, index) => index.toString()}
+            />
+          {/* </Content> */}
+        </Container>
+      )
+
+
+      // <ScrollView contentContainerStyle={{marginVertical: 10}}>
+      //   <View style={styles.newsArticle}>
+      //     {/* <Image style={{width: 90, height: 90, top: 10, left: 10}} source={{uri: 'https://i.kinja-img.com/gawker-media/image/upload/c_fill,f_auto,fl_progressive,g_center,h_675,pg_1,q_80,w_1200/aw2yhexoukminlsbrk94.jpg'}}/> 
+      //     <Text> SOmething </Text> */}
+
+          
+
+      //     {/* <View style={{backgroundColor: 'red', width: '20%', height: '100%'}}>
+      //       <Image style={{width: 60, height: 60, top: 10, left: 10}} source={{uri: 'https://i.kinja-img.com/gawker-media/image/upload/c_fill,f_auto,fl_progressive,g_center,h_675,pg_1,q_80,w_1200/aw2yhexoukminlsbrk94.jpg'}}/> 
+      //     </View>
+      //     <View style={{flex: 1, backgroundColor: 'pink', width: '60%', height: '100%', left: 80}}>
+      //       <Text> SOmething </Text>
+      //     </View> */}
+      //   </View>
+      //   <View style={styles.newsArticle}>
+      //     <Text> SOmething </Text>
+      //   </View>
+        
+      // </ScrollView>
+
+    }
+    else if (active == 'second') {
+      return(
+        <ScrollView>
+          <Text> This is the second scroll view </Text>
+        </ScrollView>
+      )
+    }
+    else if (active == 'third') {
+      return(
+        <ScrollView>
+          <Text> This is the third scroll view </Text>
+          <Text> NeededL General News section, Go TO current loc button and get stats, then County, State, Country,  </Text>
+        </ScrollView>
+      )
+    }
+  }
+
+
+
+
+
+
+
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.StatusBar}>
       </View>
 
-      <View style={{position: 'absolute', top: (Platform.OS === 'ios') ? 18 : 0, flex:1, height: height*0.55, width: width }}>
-        <UserMap userLocation={userLoc} usersPlaces={userPlace}/>
+      <View style={{position: 'absolute', top: (Platform.OS === 'ios') ? 18 : 0, flex:1, height: height*0.50, width: width }}>
+        <UserMap userLocation={userLoc} searchLocation={searchLoc} usersPlaces={userPlace} activeTab={active} getLocation={handleGetLocation} onPressMarker={pressMarker}/>
       </View>
 
       
@@ -126,9 +219,10 @@ export default function App() {
           fetchDetails={true}
           renderDescription={row => row.description} // custom description render
           onPress={(data, details = null) => { // 'details' is provided when fetchDetails = true
-            console.log("Data: ", data, " ,Details: ", details);
+            //console.log("Data: ", data, " ,Details: ", details);
             setSearchVal(details.formatted_address);
             handleGoToAddress(details.formatted_address);
+            switchToSearch();
           }}
     
           getDefaultValue={() => ''}
@@ -207,20 +301,24 @@ export default function App() {
           <Text style={[
             styles.tabTitle,
             active === 'third' ? styles.activeTabTitle : null
-            ]} onPress={() => setActive('third')}> Your Location </Text>
+            ]} onPress={() => {
+              setActive('third');
+              handleGetLocation();  // Everytime the "Your Location" tab is selected, the user loc is refreshed and panned to
+            }}> Your Location </Text>
         </View>
       </View>
 
 
-
+      {/* {console.log("Testing")} */}
       
       <View style={styles.bottomBar}> 
-
+        {returnScrollView()}
         
-        <Text> NeededL General News section, Go TO current loc button and get stats, then County, State, Country,  </Text>
-        <FetchLocation onGetLocation={handleGetLocation} />
+        
+        
+        {/* <FetchLocation onGetLocation={handleGetLocation} />
 
-        <Text> Address is: {searchVal} </Text>
+        <Text> Address is: {searchVal} </Text> */}
 
 
         {/* <View style={{marginTop: 80}}>
@@ -316,8 +414,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     flexDirection: 'row',
     width: width,
-    height: height * 0.05,
-    top: (Platform.OS === 'ios') ? height * 0.55 + 19 : height * 0.55 + 1,
+    height: height * 0.06,
+    top: (Platform.OS === 'ios') ? height * 0.50 + 19 : height * 0.50 + 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 14,
@@ -339,7 +437,23 @@ const styles = StyleSheet.create({
     flex: 1,
     position: 'absolute',
     width: width,
-    height: height * 0.40,
-    top: (Platform.OS === 'ios') ? height*0.60 + 19 : height*0.60 + 1,
-    backgroundColor: '#4b6075'}
+    height: height * 0.44,
+    top: (Platform.OS === 'ios') ? height*0.56 + 29 : height*0.56 + 10,
+    backgroundColor: '#4b6075',
+    paddingBottom: 30
+  },
+  newsArticle: {
+    //flex: 1,
+    backgroundColor: 'white',
+    height: height * 0.15,
+    width: width - 20,
+    left: 10,
+    right: 10,
+    bottom: 10,
+    borderWidth: 1,
+    borderColor: 'black',
+    marginBottom: 10,
+    // flex: 1,
+    flexDirection: 'row',
+  },
 });

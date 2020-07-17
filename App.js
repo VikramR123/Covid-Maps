@@ -136,12 +136,38 @@ export default function App() {
     }
   }
   
+  const [county, setCounty] = useState("");
+  const [state, setState] = useState("");
+  const [country, setCountry] = useState("");
 
   function pressMarker() {  // This will handle exclusively tapping the marker
     if (active != 'second') {
       setActive('second');
     }
+    getLocInfo();
     alert('Marker clicked');
+  };
+
+
+  function getLocInfo() { // Returns county, state, and country for each searched location
+    if (searchLoc != null) {
+      var url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' + searchLoc.latitude + ',' + searchLoc.longitude + '&key=' + PLACES_API_KEY;  
+      fetch(url)
+      .then(resp => resp.json())
+      .then(data => {
+        console.log("Deets: ", data.results[0].address_components);
+        //console.log("COUNTRY: ", data.results[0].address_components[5].long_name);
+        var len = data.results[0].address_components.length;
+        var _county = data.results[0].address_components[len-4].long_name;
+        var _state = data.results[0].address_components[len-3].long_name;
+        var _country = data.results[0].address_components[len-2].long_name;
+        
+        setCounty(_county);
+        setState(_state);
+        setCountry(_country);
+      })
+      .catch(err => console.log("Error: ", err));
+    }
   };
 
 
@@ -173,6 +199,12 @@ export default function App() {
       return(
         <ScrollView>
           <Text> This is the second scroll view </Text>
+          {/* <Text> {searchLoc.latitude}, {searchLoc.longitude} </Text>
+          {console.log(searchLoc.latitude, ", ", searchLoc.longitude)} */}
+          {/* <Text> {getLocInfo()} </Text> */}
+          <Text style={styles.biggerText}> County: {county} </Text>
+          <Text style={styles.biggerText}> State: {state} </Text>
+          <Text style={styles.biggerText}> Country: {country} </Text>
         </ScrollView>
       )
     }
@@ -451,4 +483,9 @@ const styles = StyleSheet.create({
     // flex: 1,
     flexDirection: 'row',
   },
+  biggerText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 20
+  }
 });

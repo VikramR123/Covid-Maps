@@ -10,6 +10,7 @@ import { ListItem, Thumbnail, Left, Body, Right, Button as Button1, Container, C
 import NewsArticle from './components/NewArticle';
 import { getArticles } from './service/news';
 import Modal from './components/Modal';
+import moment from 'moment'
 
 
 const { width, height } = Dimensions.get('screen');
@@ -135,10 +136,7 @@ export default function App() {
       setActive('second');
     }
   }
-  
-  const [county, setCounty] = useState("");
-  const [state, setState] = useState("");
-  const [country, setCountry] = useState("");
+
 
   function pressMarker() {  // This will handle exclusively tapping the marker
     if (active != 'second') {
@@ -147,6 +145,11 @@ export default function App() {
     getLocInfo();
     alert('Marker clicked');
   };
+
+  const [county, setCounty] = useState("");
+  const [state, setState] = useState("");
+  const [country, setCountry] = useState("");
+  const [countryInfo, setCountryInfo] = useState(null);
 
 
   function getLocInfo() { // Returns county, state, and country for each searched location
@@ -157,19 +160,75 @@ export default function App() {
       .then(data => {
         console.log("Deets: ", data.results[0].address_components);
         //console.log("COUNTRY: ", data.results[0].address_components[5].long_name);
-        var len = data.results[0].address_components.length;
-        var _county = data.results[0].address_components[len-4].long_name;
-        var _state = data.results[0].address_components[len-3].long_name;
-        var _country = data.results[0].address_components[len-2].long_name;
+        var _county;
+        var _state;
+        var _country;
+        var i;
+        var dataArr = data.results[0].address_components;
+
+        // For loop to pull county, state, and country info. 
+        for (i in dataArr) {
+          //console.log("Comp: ", comp)
+          if (dataArr[i].types[0] == "country") {
+            _country = dataArr[i].long_name;
+            if (_country != "United States") {
+              _county = null;
+            }
+          }
+          else if (dataArr[i].types[0] == "administrative_area_level_1") {
+            _state = dataArr[i].long_name;
+          }
+          else if (dataArr[i].types[0] == "administrative_area_level_2") {
+            _county = dataArr[i].long_name;
+          }
+        }
+
+        // var len = data.results[0].address_components.length;
+        // var _county = data.results[0].address_components[len-4].long_name;
+        // var _state = data.results[0].address_components[len-3].long_name;
+        // var _country = data.results[0].address_components[len-2].long_name;
         
         setCounty(_county);
         setState(_state);
         setCountry(_country);
+
+        const data2 = [];
+
+        var tempUrl = 'https://corona.azure-api.net/country/' + _country;
+        fetch(tempUrl)
+        .then(resp => resp.json())
+        .then(data => {
+          //var summaryJson = data.Summary.json();
+          const time = moment( data.Summary.Last_Update || moment.now() ).fromNow();
+
+          // Builds a view with all country information
+          var countryInformation = <View style={{backgroundColor: 'lavender', margin: 10, borderRadius: 10, alignItems: 'center', paddingTop: 5, paddingBottom: 5}}>
+            <Text style={{fontSize: 24, fontWeight: 'bold'}}> Country: {_country} </Text>
+            <Text> Last Updated: {time} </Text>
+            <Text style={{fontSize: 20}}> New Deaths: {data.Summary.NewDeaths} Total Deaths: {data.Summary.Deaths} </Text>
+            <Text style={{fontSize: 20}}> New Confirmed: {data.Summary.NewConfirmed} Total Confirmed: {data.Summary.Confirmed} </Text>
+            <Text style={{fontSize: 20}}> New Recovered: {data.Summary.NewRecovered} Total Recovered: {data.Summary.Recovered} </Text>
+          </View>
+          
+          //setView(JSON.stringify(data.Summary));
+          setCountryInfo(countryInformation);
+          console.log("Summary: ", data.Summary);
+        })
+        .catch(err => console.log(err));
+
+        //console.log("Data is: ", data.Summary)
+        console.log("Country :", data2)
+        
+        
+
+        //setView(temp);
       })
       .catch(err => console.log("Error: ", err));
     }
   };
 
+
+  //https://corona.azure-api.net/country/us/california/Los%20Angeles  endpoint for API
 
 
 
@@ -205,6 +264,8 @@ export default function App() {
           <Text style={styles.biggerText}> County: {county} </Text>
           <Text style={styles.biggerText}> State: {state} </Text>
           <Text style={styles.biggerText}> Country: {country} </Text>
+          {countryInfo}
+
         </ScrollView>
       )
     }

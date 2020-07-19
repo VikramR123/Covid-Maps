@@ -150,6 +150,8 @@ export default function App() {
   const [state, setState] = useState("");
   const [country, setCountry] = useState("");
   const [countryInfo, setCountryInfo] = useState(null);
+  const [stateInfo, setStateInfo] = useState(null);
+  const [countyInfo, setCountyInfo] = useState(null);
 
 
   function getLocInfo() { // Returns county, state, and country for each searched location
@@ -173,10 +175,11 @@ export default function App() {
             _country = dataArr[i].long_name;
             if (_country != "United States") {
               _county = null;
+              _state = null;
             }
           }
           else if (dataArr[i].types[0] == "administrative_area_level_1") {
-            _state = dataArr[i].long_name;
+            _state = [dataArr[i].long_name, dataArr[i].short_name];
           }
           else if (dataArr[i].types[0] == "administrative_area_level_2") {
             _county = dataArr[i].long_name;
@@ -192,7 +195,66 @@ export default function App() {
         setState(_state);
         setCountry(_country);
 
-        const data2 = [];
+        // Building the County View
+        if (_country == "United States") {
+          var countyUrl = 'https://corona.azure-api.net/country/us/' + _state[0] + "/" + _county.slice(0,-7);
+          fetch(countyUrl)
+            .then(resp => resp.json())
+            .then(data => {
+              console.log("County data: ", data);
+              const time3 = moment( data.Last_Update || moment.now() ).fromNow();
+
+              var testing = <View style={styles.caseInfo}>
+                <Text style={{fontSize: 24, fontWeight: 'bold'}}> County: {_county.slice(0,-7)} </Text>
+                <Text> Last Updated: {time3} </Text>
+                <Text style={{fontSize: 20}}> Total Deaths: {data.Deaths} </Text>
+                <Text style={{fontSize: 20}}> Total Confirmed: {data.Confirmed} </Text>
+                <Text style={{fontSize: 20}}> Total Recovered: {data.Recovered} </Text>
+              </View>
+              setCountyInfo(testing);
+            })
+            .catch(err => console.log("Error: ", err));
+        }
+        else {
+          countyInfo = null;
+        }
+
+
+        // Building the State View
+        if (_country == "United States") {
+          fetch('https://covidtracking.com/api/states/')
+            .then(resp => resp.json())
+            .then(data => {
+              //console.log("state data: ", data);
+
+              var stateData;
+
+              for (i in data) {
+                if (data[i].state == _state[1]) {
+                  stateData = data[i];
+                  break;
+                }
+              }
+
+              const time2 = moment( stateData.dateModified || moment.now() ).fromNow();
+
+              var testing = <View style={styles.caseInfo}>
+                <Text style={{fontSize: 24, fontWeight: 'bold'}}> State: {_state[0]} </Text>
+                <Text> Last Updated: {time2} </Text>
+                <Text style={{fontSize: 20}}> New Deaths: {stateData.deathIncrease} Total Deaths: {stateData.death} </Text>
+                <Text style={{fontSize: 20}}> New Confirmed: {stateData.positiveIncrease} Total Confirmed: {stateData.positive} </Text>
+                <Text style={{fontSize: 20}}> Total Recovered: {stateData.recovered} </Text>
+              </View>
+
+              setStateInfo(testing);
+            })
+            .catch(err => console.log("Error: ", err));
+        }
+        else {
+          setStateInfo(null);
+        }
+
+
 
         var tempUrl = 'https://corona.azure-api.net/country/' + _country;
         fetch(tempUrl)
@@ -202,7 +264,7 @@ export default function App() {
           const time = moment( data.Summary.Last_Update || moment.now() ).fromNow();
 
           // Builds a view with all country information
-          var countryInformation = <View style={{backgroundColor: 'lavender', margin: 10, borderRadius: 10, alignItems: 'center', paddingTop: 5, paddingBottom: 5}}>
+          var countryInformation = <View style={styles.caseInfo}>
             <Text style={{fontSize: 24, fontWeight: 'bold'}}> Country: {_country} </Text>
             <Text> Last Updated: {time} </Text>
             <Text style={{fontSize: 20}}> New Deaths: {data.Summary.NewDeaths} Total Deaths: {data.Summary.Deaths} </Text>
@@ -217,10 +279,6 @@ export default function App() {
         .catch(err => console.log(err));
 
         //console.log("Data is: ", data.Summary)
-        console.log("Country :", data2)
-        
-        
-
         //setView(temp);
       })
       .catch(err => console.log("Error: ", err));
@@ -257,13 +315,10 @@ export default function App() {
     else if (active == 'second') {
       return(
         <ScrollView>
-          <Text> This is the second scroll view </Text>
-          {/* <Text> {searchLoc.latitude}, {searchLoc.longitude} </Text>
-          {console.log(searchLoc.latitude, ", ", searchLoc.longitude)} */}
-          {/* <Text> {getLocInfo()} </Text> */}
-          <Text style={styles.biggerText}> County: {county} </Text>
-          <Text style={styles.biggerText}> State: {state} </Text>
-          <Text style={styles.biggerText}> Country: {country} </Text>
+          <Text style={{textAlign: 'center', marginBottom: 10, fontWeight: 'bold'}}> Search for an Area and Click on the Marker for More Details </Text>
+
+          {countyInfo}
+          {stateInfo}
           {countryInfo}
 
         </ScrollView>
@@ -548,5 +603,13 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 20
-  }
+  },
+  caseInfo: {
+    backgroundColor: 'lavender',
+    margin: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    paddingTop: 5,
+    paddingBottom: 5
+  },
 });

@@ -216,7 +216,7 @@ export default function App() {
             .catch(err => console.log("Error: ", err));
         }
         else {
-          countyInfo = null;
+          setCountyInfo(null);
         }
 
 

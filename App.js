@@ -61,7 +61,7 @@ export default function App() {
   const handleGetLocation = () => {
     console.log("Button Clicked");
     navigator.geolocation.getCurrentPosition(position => {
-      setUserLoc({
+      setSearchLoc({
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
         latitudeDelta: 0.00422,
@@ -99,20 +99,6 @@ export default function App() {
       .catch(err => console.log(err));
   };
 
-
-  const handleStates = () => {
-    console.log("Handling states");
-    var requestOptions = {
-      method: 'GET',
-      redirect: 'follow'
-    };
-    fetch('https://health-api.com/api/v1/covid-19/US/full', requestOptions)
-      .then(res => res.text())
-      .then(parsedRes => console.log(parsedRes))
-      .catch(err => console.log(err));
-    console.log("Done with states");
-  };
-
   
   const handleGoToAddress = (address) => {
     Geocoder.from(address)
@@ -143,7 +129,7 @@ export default function App() {
       setActive('second');
     }
     getLocInfo();
-    alert('Marker clicked');
+    //alert('Marker clicked');
   };
 
   const [county, setCounty] = useState("");
@@ -207,9 +193,9 @@ export default function App() {
               var testing = <View style={styles.caseInfo}>
                 <Text style={{fontSize: 24, fontWeight: 'bold'}}> County: {_county.slice(0,-7)} </Text>
                 <Text> Last Updated: {time3} </Text>
-                <Text style={{fontSize: 20}}> Total Deaths: {data.Deaths} </Text>
-                <Text style={{fontSize: 20}}> Total Confirmed: {data.Confirmed} </Text>
-                <Text style={{fontSize: 20}}> Total Recovered: {data.Recovered} </Text>
+                <Text style={{fontSize: 20}}> Total Deaths: <Text style={styles.caseNums}>{data.Deaths}</Text> </Text>
+                <Text style={{fontSize: 20}}> Total Confirmed Positive: <Text style={styles.caseNums}>{data.Confirmed}</Text> </Text>
+                <Text style={{fontSize: 20}}> Total Recovered: <Text style={styles.caseNums}>{data.Recovered}</Text> </Text>
               </View>
               setCountyInfo(testing);
             })
@@ -241,9 +227,9 @@ export default function App() {
               var testing = <View style={styles.caseInfo}>
                 <Text style={{fontSize: 24, fontWeight: 'bold'}}> State: {_state[0]} </Text>
                 <Text> Last Updated: {time2} </Text>
-                <Text style={{fontSize: 20}}> New Deaths: {stateData.deathIncrease} Total Deaths: {stateData.death} </Text>
-                <Text style={{fontSize: 20}}> New Confirmed: {stateData.positiveIncrease} Total Confirmed: {stateData.positive} </Text>
-                <Text style={{fontSize: 20}}> Total Recovered: {stateData.recovered} </Text>
+                <Text adjustsFontSizeToFit numberOfLines={1} style={{fontSize: 20}}> Total Deaths: <Text style={styles.caseNums}>{stateData.death}</Text> | New: <Text style={styles.caseNums}>{stateData.deathIncrease}</Text></Text>
+                <Text adjustsFontSizeToFit numberOfLines={1} style={{fontSize: 20}}> Total Confirmed: <Text style={styles.caseNums}>{stateData.positive}</Text> | New: <Text style={styles.caseNums}>{stateData.positiveIncrease}</Text></Text>
+                <Text style={{fontSize: 20}}> Total Recovered: <Text style={styles.caseNums}>{(stateData.recovered === null) ? "No Data" : stateData.recovered}</Text> </Text>
               </View>
 
               setStateInfo(testing);
@@ -267,9 +253,9 @@ export default function App() {
           var countryInformation = <View style={styles.caseInfo}>
             <Text style={{fontSize: 24, fontWeight: 'bold'}}> Country: {_country} </Text>
             <Text> Last Updated: {time} </Text>
-            <Text style={{fontSize: 20}}> New Deaths: {data.Summary.NewDeaths} Total Deaths: {data.Summary.Deaths} </Text>
-            <Text style={{fontSize: 20}}> New Confirmed: {data.Summary.NewConfirmed} Total Confirmed: {data.Summary.Confirmed} </Text>
-            <Text style={{fontSize: 20}}> New Recovered: {data.Summary.NewRecovered} Total Recovered: {data.Summary.Recovered} </Text>
+            <Text adjustsFontSizeToFit numberOfLines={1} style={{fontSize: 20, paddingBottom: 5}}> Total Deaths: <Text style={styles.caseNums}>{data.Summary.Deaths}</Text> | New: <Text style={styles.caseNums}>{data.Summary.NewDeaths}</Text> </Text>
+            <Text adjustsFontSizeToFit numberOfLines={1} style={{fontSize: 20, paddingBottom: 5}}> Total Confirmed: <Text style={styles.caseNums}>{data.Summary.Confirmed}</Text> | New: <Text style={styles.caseNums}>{data.Summary.NewConfirmed}</Text></Text>
+            <Text adjustsFontSizeToFit numberOfLines={1} style={{fontSize: 20}}> Total Recovered: <Text style={styles.caseNums}>{data.Summary.Recovered}</Text> | New: <Text style={styles.caseNums}>{data.Summary.NewRecovered}</Text></Text>
           </View>
           
           //setView(JSON.stringify(data.Summary));
@@ -315,7 +301,10 @@ export default function App() {
     else if (active == 'second') {
       return(
         <ScrollView>
-          <Text style={{textAlign: 'center', marginBottom: 10, fontWeight: 'bold'}}> Search for an Area and Click on the Marker for More Details </Text>
+          <View style={{backgroundColor: '#007AFF', margin: 10, borderRadius: 10}} >
+            <Button color='white' title="Go to Current Location" onPress={handleGetLocation}/>
+          </View>
+
 
           {countyInfo}
           {stateInfo}
@@ -353,7 +342,7 @@ export default function App() {
       
       <View style={styles.searchBar}>
         <GooglePlacesAutocomplete
-          placeholder='Search'
+          placeholder='Search a city and click the marker for info'
           minLength={2} // minimum length of text to search
           autoFocus={false}
           returnKeyType={'search'} // Can be left out for default return key https://facebook.github.io/react-native/docs/textinput.html#returnkeytype
@@ -426,7 +415,7 @@ export default function App() {
           <Text style={[
             styles.tabTitle,
             active === 'first' ? styles.activeTabTitle : null
-            ]} onPress={() => setActive('first')}> General News </Text>
+            ]} onPress={() => setActive('first')}> Top Headlines </Text>
         </View>
         <View style={[
           styles.tab,
@@ -435,9 +424,9 @@ export default function App() {
           <Text style={[
             styles.tabTitle,
             active === 'second' ? styles.activeTabTitle : null
-            ]} onPress={() => setActive('second')}> Specific Area </Text>
+            ]} onPress={() => setActive('second')}> Location Look-Up </Text>
         </View>
-        <View style={[
+        {/* <View style={[
           styles.tab,
           (active === 'third') ? styles.activeTab : null
           ]}>
@@ -448,7 +437,7 @@ export default function App() {
               setActive('third');
               handleGetLocation();  // Everytime the "Your Location" tab is selected, the user loc is refreshed and panned to
             }}> Your Location </Text>
-        </View>
+        </View> */}
       </View>
 
 
@@ -612,4 +601,8 @@ const styles = StyleSheet.create({
     paddingTop: 5,
     paddingBottom: 5
   },
+  caseNums: {
+    color: 'red',
+    fontWeight: 'bold'
+  }
 });

@@ -35,11 +35,11 @@ const modalComp = props => {
                     <Body>
                         <Title children={data.title} style={{color: 'white'}}/>
                     </Body>
-                    <Right>
+                    {/* <Right>
                         <Button onPress={handleShare} transparent>
                             <Icon name='share' style={{color: 'white', fontSize:20}} />
                         </Button>
-                    </Right>
+                    </Right> */}
                 </Header>
                 <Content contentContainerStyle={{height: webViewHeight}}>
                     <WebView source={{uri: data.url}} style={{flex: 1}}

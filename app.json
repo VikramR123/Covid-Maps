@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "HelloWorld",
+    "name": "Covid Maps",
     "slug": "Covid-Maps",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/covid_icon.png",
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
+      "image": "./assets/covid_splash.png",
+      "resizeMode": "cover", 
       "backgroundColor": "#ffffff"
     },
     "updates": {

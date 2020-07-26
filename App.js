@@ -1,6 +1,6 @@
 import { StatusBar, setStatusBarBackgroundColor } from 'expo-status-bar';
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Image, Button, Dimensions, Platform, SafeAreaView, ScrollView, ActivityIndicator, FlatList } from 'react-native';
+import { StyleSheet, Text, View, Image, Button, Dimensions, Platform, SafeAreaView, ScrollView, Modal, ActivityIndicator } from 'react-native';
 import SwipeUpDown from 'react-native-swipe-up-down';
 import UserMap from './components/UserMap';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
@@ -9,7 +9,7 @@ import Geocoder from 'react-native-geocoding';
 import { ListItem, Thumbnail, Left, Body, Right, Button as Button1, Container, Content, List } from 'native-base';
 import NewsArticle from './components/NewArticle';
 import { getArticles } from './service/news';
-import Modal from './components/Modal';
+import NewsModal from './components/Modal';
 import moment from 'moment'
 
 
@@ -35,6 +35,8 @@ export default function App() {
   const [data, setData] = useState(null); // The news article list
   const [modalVisible, setModalVisibility] = useState(false); // The modal is the pop-up of news article
   const [modalData, setModalData] = useState({});
+
+  const [loadingModalVis, setLoadingModalVis] = useState(false);
 
   // The functional component version of componentDidMount() - runs every render, except only once because []
   useEffect(() => {
@@ -142,6 +144,8 @@ export default function App() {
 
   function getLocInfo() { // Returns county, state, and country for each searched location
     if (searchLoc != null) {
+      setLoadingModalVis(true);  // Makes the loading modal visible until end of this function
+
       var url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' + searchLoc.latitude + ',' + searchLoc.longitude + '&key=' + PLACES_API_KEY;  
       fetch(url)
       .then(resp => resp.json())
@@ -260,7 +264,10 @@ export default function App() {
           
           //setView(JSON.stringify(data.Summary));
           setCountryInfo(countryInformation);
-          console.log("Summary: ", data.Summary);
+          //console.log("Summary: ", data.Summary);
+
+
+          setLoadingModalVis(false); // Sets the modal back to invisible once all the data loads
         })
         .catch(err => console.log(err));
 
@@ -290,7 +297,7 @@ export default function App() {
             keyExtractor={(item, index) => index.toString()}
           />
           {/* </Content> */}
-          <Modal 
+          <NewsModal 
             showModel={modalVisible}
             articleData={modalData}
             onCloseWindow={handleModalOnClose}
@@ -299,11 +306,16 @@ export default function App() {
       )
     }
     else if (active == 'second') {
+      let iosButton = <View style={{backgroundColor: '#007AFF', margin: 10, borderRadius: 10}} >
+        <Button color='white' title="Go to Current Location" onPress={handleGetLocation}/>
+      </View>
+
+      let androidButton = <View style={{backgroundColor: '#007AFF', margin: 10}} >
+        <Button color='blue' title="Go to Current Location" onPress={handleGetLocation}/>
+      </View>
       return(
         <ScrollView>
-          <View style={{backgroundColor: '#007AFF', margin: 10, borderRadius: 10}} >
-            <Button color='white' title="Go to Current Location" onPress={handleGetLocation}/>
-          </View>
+          {(Platform.OS === 'ios') ? iosButton  : androidButton}
 
 
           {countyInfo}
@@ -317,16 +329,11 @@ export default function App() {
       return(
         <ScrollView>
           <Text> This is the third scroll view </Text>
-          <Text> NeededL General News section, Go TO current loc button and get stats, then County, State, Country,  </Text>
+          <Text> No longer needed but here in case needed for future  </Text>
         </ScrollView>
       )
     }
   }
-
-
-
-
-
 
 
 
@@ -335,7 +342,7 @@ export default function App() {
       <View style={styles.StatusBar}>
       </View>
 
-      <View style={{position: 'absolute', top: (Platform.OS === 'ios') ? 18 : 0, flex:1, height: height*0.50, width: width }}>
+      <View style={{position: 'absolute', top: (Platform.OS === 'ios') ? 18 : 24, flex:1, height: height*0.50, width: width }}>
         <UserMap userLocation={userLoc} searchLocation={searchLoc} usersPlaces={userPlace} activeTab={active} getLocation={handleGetLocation} onPressMarker={pressMarker}/>
       </View>
 
@@ -405,6 +412,38 @@ export default function App() {
         />
 
         {/* <Icon name="ios-search" size={20} color='black' /> */}
+
+
+        {/* Modal for dimming the screen while loading all information */}
+        <Modal
+          //animationType="slide"
+          transparent={true}
+          visible={loadingModalVis}
+          backdropOpacity={0.1}
+          onRequestClose={() => {
+            Alert.alert("Modal has been closed.");
+          }}
+        >
+          <View style={{backgroundColor: 'rgba(0,0,0,0.5)', height: height, width: width,}}>
+            <Modal
+              //animationType="slide"
+              transparent={true}
+              visible={true}
+              backdropOpacity={0.1}
+              onRequestClose={() => {
+                Alert.alert("Modal has been closed.");
+              }}
+            >
+              <View style={{top: height * 0.4, alignSelf: 'center'}}>
+                <ActivityIndicator size="large" color="white" />
+              </View>
+
+            </Modal>
+          </View>
+
+        </Modal>
+
+
       </View>
       
       <View style={styles.tabs}>
@@ -504,7 +543,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   StatusBar: {
-    height: (Platform.OS === 'ios') ? 18 : 0, //this is just to test if the platform is iOS to give it a height of 18, else, no height (Android apps have their own status bar)
+    height: (Platform.OS === 'ios') ? 18 : 24, //this is just to test if the platform is iOS to give it a height of 18, else, no height (Android apps have their own status bar)
     backgroundColor: "white",
   },
   header: {
@@ -514,7 +553,7 @@ const styles = StyleSheet.create({
   searchBar: {
     flex: 1,
     position: 'absolute',
-    top: (Platform.OS === 'ios') ? 32 : 15, // Normally 18 : 0 to align to very top below StatusBar, but added cushion for style
+    top: (Platform.OS === 'ios') ? 32 : 40, // Normally 18 : 0 to align to very top below StatusBar, but added cushion for style
     width: width * 0.9,
     //height: height  * 0.35 // To cut off the "Powered by Google" banner at bottom
   },
@@ -547,7 +586,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: width,
     height: height * 0.06,
-    top: (Platform.OS === 'ios') ? height * 0.50 + 19 : height * 0.50 + 1,
+    top: (Platform.OS === 'ios') ? height * 0.50 + 19 : height * 0.50 + 20,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 14,
@@ -569,8 +608,8 @@ const styles = StyleSheet.create({
     flex: 1,
     position: 'absolute',
     width: width,
-    height: height * 0.44,
-    top: (Platform.OS === 'ios') ? height*0.56 + 29 : height*0.56 + 10,
+    height: (Platform.OS === 'ios') ? height * 0.44 : height * 0.38,
+    top: (Platform.OS === 'ios') ? height*0.56 + 29 : height*0.56 + 25,
     backgroundColor: '#4b6075',
     paddingBottom: 30
   },

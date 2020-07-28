@@ -11,6 +11,8 @@ import NewsArticle from './components/NewArticle';
 import { getArticles } from './service/news';
 import NewsModal from './components/Modal';
 import moment from 'moment'
+import * as Font from 'expo-font';
+import { AppLoading } from 'expo';
 
 
 const { width, height } = Dimensions.get('screen');
@@ -42,6 +44,18 @@ export default function App() {
   useEffect(() => {
     setLoading(true);
     getArticles().then(data => setData(data));
+    // await Font.loadAsync({
+    //   //'Roboto': require('native-base/Fonts/Roboto.ttf'),
+    //   'Roboto_medium': require('Fonts/Roboto-Medium.ttf'),
+    //   ...Ionicons.font,
+    // })
+    const loadFonts = async () => {
+      await Font.loadAsync({
+        'Roboto_medium': require('./assets/fonts/Roboto-Medium.ttf'),
+      });
+      //setFontReady(true);
+    };
+    loadFonts();
   }, [])
 
 
@@ -61,7 +75,7 @@ export default function App() {
 
   
   const handleGetLocation = () => {
-    console.log("Button Clicked");
+    //console.log("Button Clicked");
     navigator.geolocation.getCurrentPosition(position => {
       setSearchLoc({
         latitude: position.coords.latitude,
@@ -81,6 +95,7 @@ export default function App() {
     //   .then(res => console.log(res.json()))
     //   .catch(err => console.log(err));
     }, err => {console.log(err);});
+    
   };
 
   const getUserPlacesHandler = () => {
@@ -191,8 +206,8 @@ export default function App() {
           fetch(countyUrl)
             .then(resp => resp.json())
             .then(data => {
-              console.log("County data: ", data);
-              const time3 = moment( data.Last_Update || moment.now() ).fromNow();
+              //console.log("County data: ", data);
+              const time3 = moment( data.Last_Update.replace("+00:00", "Z") || moment.now() ).fromNow();
 
               var testing = <View style={styles.caseInfo}>
                 <Text style={{fontSize: 24, fontWeight: 'bold'}}> County: {_county.slice(0,-7)} </Text>
@@ -226,7 +241,7 @@ export default function App() {
                 }
               }
 
-              const time2 = moment( stateData.dateModified || moment.now() ).fromNow();
+              const time2 = moment( stateData.dateModified.replace("+00:00", "Z") || moment.now() ).fromNow();
 
               var testing = <View style={styles.caseInfo}>
                 <Text style={{fontSize: 24, fontWeight: 'bold'}}> State: {_state[0]} </Text>
@@ -250,8 +265,9 @@ export default function App() {
         fetch(tempUrl)
         .then(resp => resp.json())
         .then(data => {
-          //var summaryJson = data.Summary.json();
-          const time = moment( data.Summary.Last_Update || moment.now() ).fromNow();
+          //console.log("Summary2: ", data.Summary);
+          const time = moment( data.Summary.Last_Update.replace("+00:00", "Z"), 'YYYY-MM-DD HH:mm:ss Z' || moment.now() ).fromNow();
+          //data.Summary.Last_Update, 'YYYY-MM-DD HH:mm:ss ZZ'
 
           // Builds a view with all country information
           var countryInformation = <View style={styles.caseInfo}>
@@ -419,7 +435,6 @@ export default function App() {
           //animationType="slide"
           transparent={true}
           visible={loadingModalVis}
-          backdropOpacity={0.1}
           onRequestClose={() => {
             Alert.alert("Modal has been closed.");
           }}
@@ -429,13 +444,12 @@ export default function App() {
               //animationType="slide"
               transparent={true}
               visible={true}
-              backdropOpacity={0.1}
               onRequestClose={() => {
                 Alert.alert("Modal has been closed.");
               }}
             >
               <View style={{top: height * 0.4, alignSelf: 'center'}}>
-                <ActivityIndicator size="large" color="white" />
+                <ActivityIndicator size="large" color={(Platform.OS === 'ios') ? "white" : "blue"} />
               </View>
 
             </Modal>

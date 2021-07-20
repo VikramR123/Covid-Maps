@@ -16,7 +16,7 @@
     "native-base": "^2.13.12",
     "react": "~16.11.0",
     "react-dom": "~16.11.0",
-    "react-native": "~0.62.2",
+    "react-native": "~0.62.3",
     "react-native-dynamic-search-bar": "^1.2.1",
     "react-native-elements": "^2.0.4",
     "react-native-geocoding": "^0.4.0",
